@@ -3,14 +3,35 @@ extends Node
 
 const VoxelData = preload("res://scripts/voxel_data.gd")
 
-# Vertices for each face (right, left, top, bottom, front, back)
+# Vertices for each face defined in counter-clockwise order when viewed from outside
 var FACE_VERTICES = [
-	[Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(1, 1, 1), Vector3(1, 0, 1)],  # Right
-	[Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 1, 1), Vector3(0, 0, 1)],  # Left
-	[Vector3(0, 1, 0), Vector3(1, 1, 0), Vector3(1, 1, 1), Vector3(0, 1, 1)],  # Top
-	[Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 0, 1), Vector3(0, 0, 1)],  # Bottom
-	[Vector3(0, 0, 1), Vector3(1, 0, 1), Vector3(1, 1, 1), Vector3(0, 1, 1)],  # Front
-	[Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(0, 1, 0)]   # Back
+	# Right face (+X) - when looking at the face from +X
+	[Vector3(1, 0, 1), Vector3(1, 1, 1), Vector3(1, 1, 0), Vector3(1, 0, 0)],
+	
+	# Left face (-X) - when looking at the face from -X
+	[Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 1, 1), Vector3(0, 0, 1)],
+	
+	# Top face (+Y) - when looking at the face from +Y
+	[Vector3(0, 1, 1), Vector3(0, 1, 0), Vector3(1, 1, 0), Vector3(1, 1, 1)],
+	
+	# Bottom face (-Y) - when looking at the face from -Y
+	[Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 0, 1), Vector3(0, 0, 1)],
+	
+	# Front face (+Z) - when looking at the face from +Z
+	[Vector3(0, 0, 1), Vector3(0, 1, 1), Vector3(1, 1, 1), Vector3(1, 0, 1)],
+	
+	# Back face (-Z) - when looking at the face from -Z
+	[Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(0, 1, 0), Vector3(0, 0, 0)]
+]
+
+# UV coordinates matching the vertex order
+var FACE_UVS = [
+	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
+	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
+	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
+	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
+	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
+	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)]
 ]
 
 func generate_chunk_mesh(chunk: Chunk) -> void:
@@ -40,14 +61,8 @@ func generate_chunk_mesh(chunk: Chunk) -> void:
 	
 	var mesh = ArrayMesh.new()
 	if vertices.size() > 0:
-		# Create the mesh with explicit settings
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		
-		# Force the surface to use the correct face culling
-		var mesh_instance = chunk.mesh_instance
-		mesh_instance.mesh = mesh
-		mesh_instance.set_surface_override_material(0, StandardMaterial3D.new())
-		mesh_instance.get_surface_override_material(0).cull_mode = StandardMaterial3D.CULL_BACK
+		chunk.mesh_instance.mesh = mesh
 
 func _add_voxel_faces(vertices: PackedVector3Array, uvs: PackedVector2Array, normals: PackedVector3Array, 
 					 colors: PackedColorArray, indices: PackedInt32Array, pos: Vector3i, 
@@ -78,14 +93,14 @@ func _add_voxel_faces(vertices: PackedVector3Array, uvs: PackedVector2Array, nor
 			)
 			var final_color = base_color * ao_color * light_color
 			
-			# Add vertices in counter-clockwise order for front face visibility
+			# Add vertices
 			for v in range(4):
 				vertices.append(FACE_VERTICES[i][v] + Vector3(pos))
-				uvs.append(Vector2(float(v == 1 || v == 2), float(v >= 2)))  # Simple UV mapping
+				uvs.append(FACE_UVS[i][v])
 				normals.append(face_normals[i])
 				colors.append(final_color)
 			
-			# Add indices in counter-clockwise order
+			# Add indices for triangles in counter-clockwise order
 			indices.append(vertex_index)
 			indices.append(vertex_index + 1)
 			indices.append(vertex_index + 2)
