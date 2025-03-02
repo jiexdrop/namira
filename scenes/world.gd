@@ -7,11 +7,12 @@ func _ready():
 	add_child(chunk_manager)
 	add_child(mesh_generator)
 	
-	# Create a basic material
+	# Create a basic material with explicit culling settings
 	var material = StandardMaterial3D.new()
 	material.albedo_color = Color(0.7, 0.7, 0.7)
 	material.roughness = 0.8
 	material.vertex_color_use_as_albedo = true
+	material.cull_mode = StandardMaterial3D.CULL_BACK  # Explicitly set culling mode
 	
 	# Set up the camera with controller
 	var camera = CameraController.new()
