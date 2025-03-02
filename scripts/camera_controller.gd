@@ -7,8 +7,13 @@ var current_velocity = Vector3.ZERO
 var acceleration = 50.0
 var friction = 5.0
 
+var voxel_interaction: VoxelInteraction
+
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func set_voxel_interaction(interaction: VoxelInteraction):
+	voxel_interaction = interaction
 
 func _input(event):
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -16,11 +21,21 @@ func _input(event):
 		var new_rotation = rotation.x - event.relative.y * mouse_sensitivity
 		rotation.x = clamp(new_rotation, -PI/2, PI/2)
 	
-	if event.is_action_pressed("ui_cancel"):
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			_handle_voxel_breaking()
+	
+	elif event.is_action_pressed("ui_cancel"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _handle_voxel_breaking():
+	if voxel_interaction:
+		var target = voxel_interaction.get_target_voxel(self)
+		if target.hit:
+			voxel_interaction.break_voxel(target.chunk, target.voxel_pos)
 
 func _physics_process(delta):
 	var input_dir = Vector3.ZERO

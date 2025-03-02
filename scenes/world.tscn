@@ -1,6 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://rhsi6ruvxy3h"]
+[gd_scene load_steps=3 format=3 uid="uid://rhsi6ruvxy3h"]
 
 [ext_resource type="Script" path="res://scenes/world.gd" id="1_qlksf"]
+[ext_resource type="Texture2D" uid="uid://wxb760qms3tg" path="res://images/cross.png" id="2_62jkv"]
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_qlksf")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_62jkv")

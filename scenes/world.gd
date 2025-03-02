@@ -2,6 +2,7 @@ extends Node3D
 
 @onready var chunk_manager = ChunkManager.new()
 @onready var mesh_generator = MeshGenerator.new()
+@onready var voxel_interaction = VoxelInteraction.new(chunk_manager, mesh_generator)
 
 func _ready():
 	add_child(chunk_manager)
@@ -12,12 +13,13 @@ func _ready():
 	material.albedo_color = Color(0.7, 0.7, 0.7)
 	material.roughness = 0.8
 	material.vertex_color_use_as_albedo = true
-	material.cull_mode = StandardMaterial3D.CULL_BACK  # Use back-face culling
+	material.cull_mode = StandardMaterial3D.CULL_BACK
 	
 	# Set up the camera with controller
 	var camera = CameraController.new()
 	camera.position = Vector3(16, 32, 16)
 	camera.rotation_degrees = Vector3(-45, 45, 0)
+	camera.set_voxel_interaction(voxel_interaction)
 	add_child(camera)
 	
 	# Add a light
