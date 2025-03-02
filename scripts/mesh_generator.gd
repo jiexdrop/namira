@@ -4,23 +4,24 @@ extends Node
 const VoxelData = preload("res://scripts/voxel_data.gd")
 
 # Vertices for each face (right, left, top, bottom, front, back)
+# Vertices are now ordered clockwise when looking at the face from outside
 var FACE_VERTICES = [
-	[Vector3(1, 0, 0), Vector3(1, 1, 0), Vector3(1, 1, 1), Vector3(1, 0, 1)],  # Right
-	[Vector3(0, 0, 1), Vector3(0, 1, 1), Vector3(0, 1, 0), Vector3(0, 0, 0)],  # Left
-	[Vector3(0, 1, 0), Vector3(0, 1, 1), Vector3(1, 1, 1), Vector3(1, 1, 0)],  # Top
-	[Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(1, 0, 1), Vector3(0, 0, 1)],  # Bottom
+	[Vector3(1, 0, 0), Vector3(1, 0, 1), Vector3(1, 1, 1), Vector3(1, 1, 0)],  # Right
+	[Vector3(0, 0, 1), Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(0, 1, 1)],  # Left
+	[Vector3(0, 1, 0), Vector3(1, 1, 0), Vector3(1, 1, 1), Vector3(0, 1, 1)],  # Top
+	[Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(1, 0, 1), Vector3(1, 0, 0)],  # Bottom
 	[Vector3(0, 0, 1), Vector3(1, 0, 1), Vector3(1, 1, 1), Vector3(0, 1, 1)],  # Front
 	[Vector3(1, 0, 0), Vector3(0, 0, 0), Vector3(0, 1, 0), Vector3(1, 1, 0)]   # Back
 ]
 
 # UV coordinates for each vertex
 var FACE_UVS = [
-	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
-	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
-	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
-	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
-	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)],
-	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)]
+	[Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)],
+	[Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)],
+	[Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)],
+	[Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)],
+	[Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)],
+	[Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
 ]
 
 func generate_chunk_mesh(chunk: Chunk) -> void:
@@ -90,13 +91,13 @@ func _add_voxel_faces(vertices: PackedVector3Array, uvs: PackedVector2Array, nor
 				normals.append(face_normals[i])
 				colors.append(final_color)
 			
-			# Add indices for two triangles
+			# Add indices for two triangles (clockwise winding)
 			indices.append(vertex_index)
+			indices.append(vertex_index + 2)
 			indices.append(vertex_index + 1)
-			indices.append(vertex_index + 2)
 			indices.append(vertex_index)
-			indices.append(vertex_index + 2)
 			indices.append(vertex_index + 3)
+			indices.append(vertex_index + 2)
 			
 			vertex_index += 4
 			
