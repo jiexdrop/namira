@@ -11,7 +11,7 @@ func _ready():
 	
 	# Create the base material
 	var material = StandardMaterial3D.new()
-	material.albedo_texture = load("res://images/grass_block_side.png")  # Default texture
+	material.albedo_texture = load("res://images/texture_atlas.png")  # Load the texture atlas
 	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	material.roughness = 0.8
 	material.vertex_color_use_as_albedo = true

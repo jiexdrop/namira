@@ -10,10 +10,11 @@ var block_uvs = {}
 
 func _init():
 	# Initialize UV coordinates for different block types
-	# Each entry contains UV coordinates for all 6 faces (right, left, top, bottom, front, back)
-	# UV coordinates are normalized (0-1)
 	
-	# Grass Block
+	# Air block (should never be rendered, but included for completeness)
+	block_uvs[BlockTypes.Type.AIR] = _create_all_faces(0, 0)
+	
+	# Grass Block (special case with different top/bottom/sides)
 	block_uvs[BlockTypes.Type.GRASS] = {
 		"right":  _get_texture_uv(0, 0),   # Side texture (grass_block_side)
 		"left":   _get_texture_uv(0, 0),   # Side texture
@@ -23,44 +24,27 @@ func _init():
 		"back":   _get_texture_uv(0, 0)    # Side texture
 	}
 	
-	# Dirt Block
-	block_uvs[BlockTypes.Type.DIRT] = {
-		"right":  _get_texture_uv(2, 0),   # Dirt texture
-		"left":   _get_texture_uv(2, 0),
-		"top":    _get_texture_uv(2, 0),
-		"bottom": _get_texture_uv(2, 0),
-		"front":  _get_texture_uv(2, 0),
-		"back":   _get_texture_uv(2, 0)
-	}
+	# Dirt Block (same texture all sides)
+	block_uvs[BlockTypes.Type.DIRT] = _create_all_faces(2, 0)
 	
-	# Stone Block
-	block_uvs[BlockTypes.Type.STONE] = {
-		"right":  _get_texture_uv(3, 0),   # Stone texture
-		"left":   _get_texture_uv(3, 0),
-		"top":    _get_texture_uv(3, 0),
-		"bottom": _get_texture_uv(3, 0),
-		"front":  _get_texture_uv(3, 0),
-		"back":   _get_texture_uv(3, 0)
-	}
+	# Stone Block (same texture all sides)
+	block_uvs[BlockTypes.Type.STONE] = _create_all_faces(3, 0)
 	
-	# Oak Planks
-	block_uvs[BlockTypes.Type.OAK_PLANKS] = {
-		"right":  _get_texture_uv(4, 0),   # Oak planks texture
-		"left":   _get_texture_uv(4, 0),
-		"top":    _get_texture_uv(4, 0),
-		"bottom": _get_texture_uv(4, 0),
-		"front":  _get_texture_uv(4, 0),
-		"back":   _get_texture_uv(4, 0)
-	}
+	# Oak Planks (same texture all sides)
+	block_uvs[BlockTypes.Type.OAK_PLANKS] = _create_all_faces(4, 0)
 	
-	# Cobblestone
-	block_uvs[BlockTypes.Type.COBBLESTONE] = {
-		"right":  _get_texture_uv(5, 0),   # Cobblestone texture
-		"left":   _get_texture_uv(5, 0),
-		"top":    _get_texture_uv(5, 0),
-		"bottom": _get_texture_uv(5, 0),
-		"front":  _get_texture_uv(5, 0),
-		"back":   _get_texture_uv(5, 0)
+	# Cobblestone (same texture all sides)
+	block_uvs[BlockTypes.Type.COBBLESTONE] = _create_all_faces(5, 0)
+
+func _create_all_faces(x: int, y: int) -> Dictionary:
+	var uvs = _get_texture_uv(x, y)
+	return {
+		"right": uvs,
+		"left": uvs,
+		"top": uvs,
+		"bottom": uvs,
+		"front": uvs,
+		"back": uvs
 	}
 
 func _get_texture_uv(x: int, y: int) -> Array:
