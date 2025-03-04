@@ -3,6 +3,7 @@ extends Node
 
 const VoxelData = preload("res://scripts/voxel_data.gd")
 var block_types = BlockTypes.new()
+var block_textures = BlockTextures.new()
 
 # Vertices for each face defined in counter-clockwise order when viewed from outside
 var FACE_VERTICES = [
@@ -40,13 +41,6 @@ const FACE_NORMALS = [
 	Vector3(0, 0, 1),  # Front
 	Vector3(0, 0, -1)  # Back
 ]
-
-var FACE_UVS = PackedVector2Array([
-	Vector2(0, 1), # Bottom-left
-	Vector2(0, 0), # Top-left
-	Vector2(1, 0), # Top-right
-	Vector2(1, 1)  # Bottom-right
-])
 
 const FACE_NAMES = ["right", "left", "top", "bottom", "front", "back"]
 
@@ -92,11 +86,24 @@ func _add_voxel_faces(vertices: PackedVector3Array, uvs: PackedVector2Array, nor
 		var neighbor = chunk.get_voxel(neighbor_pos)
 		
 		if neighbor == null or neighbor.type == BlockTypes.Type.AIR:
+			# Get the correct UV coordinates for this face
+			var face_name = FACE_NAMES[i]
+			var face_type = "side"
+			
+			# Determine the correct texture type based on the face
+			if face_name == "top":
+				face_type = "top"
+			elif face_name == "bottom":
+				face_type = "bottom"
+			
+			# Get UV coordinates for this block type and face
+			var face_uvs = block_textures.block_uvs[voxel.type][face_name]
+			
 			# Add vertices for this face
 			for v in range(4):
 				vertices.append(FACE_VERTICES[i][v] + Vector3(pos))
 				normals.append(FACE_NORMALS[i])
-				uvs.append(FACE_UVS[v])
+				uvs.append(face_uvs[v])  # Use the correct UV coordinates for this face
 			
 			# Add indices for triangles (two triangles per face)
 			indices.append(vertex_index)
