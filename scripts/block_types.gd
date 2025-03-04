@@ -14,44 +14,47 @@ var block_textures = {}
 
 func _init():
 	# Load textures for each block type
+	_load_block_textures()
+
+func _load_block_textures():
+	# Grass Block
 	block_textures[Type.GRASS] = {
-		"top": preload("res://images/grass_block_top.png"),
-		"side": preload("res://images/grass_block_side.png"),
-		"bottom": preload("res://images/dirt.png")
+		"top": load("res://images/grass_block_top.png"),
+		"side": load("res://images/grass_block_side.png"),
+		"bottom": load("res://images/dirt.png")
 	}
 	
+	# Dirt Block
 	block_textures[Type.DIRT] = {
-		"all": preload("res://images/dirt.png")
+		"top": load("res://images/dirt.png"),
+		"side": load("res://images/dirt.png"),
+		"bottom": load("res://images/dirt.png")
 	}
 	
+	# Stone Block
 	block_textures[Type.STONE] = {
-		"all": preload("res://images/stone.png")
+		"top": load("res://images/stone.png"),
+		"side": load("res://images/stone.png"),
+		"bottom": load("res://images/stone.png")
 	}
 	
+	# Oak Planks
 	block_textures[Type.OAK_PLANKS] = {
-		"top": preload("res://images/oak_planks_top.png"),
-		"side": preload("res://images/oak_planks.png")
+		"top": load("res://images/oak_planks_top.png"),
+		"side": load("res://images/oak_planks.png"),
+		"bottom": load("res://images/oak_planks_top.png")
 	}
 	
+	# Cobblestone
 	block_textures[Type.COBBLESTONE] = {
-		"all": preload("res://images/cobblestone.png")
+		"top": load("res://images/cobblestone.png"),
+		"side": load("res://images/cobblestone.png"),
+		"bottom": load("res://images/cobblestone.png")
 	}
 
-func get_block_texture(block_type: int, face: String) -> Texture2D:
+func get_texture_for_face(block_type: int, face: String) -> Texture2D:
 	if not block_textures.has(block_type):
 		return null
-		
-	var block = block_textures[block_type]
 	
-	# If the block has an "all" texture, use it for all faces
-	if block.has("all"):
-		return block["all"]
-		
-	# Otherwise, use specific face textures
-	match face:
-		"top":
-			return block.get("top", block.get("side"))
-		"bottom":
-			return block.get("bottom", block.get("side"))
-		_:  # sides
-			return block.get("side")
+	var block = block_textures[block_type]
+	return block.get(face, block.get("side"))

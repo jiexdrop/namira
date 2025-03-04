@@ -9,46 +9,35 @@ func _ready():
 	add_child(chunk_manager)
 	add_child(mesh_generator)
 	
-	# Create materials for each block type
-	var materials = {}
-	for block_type in BlockTypes.Type.values():
-		if block_type != BlockTypes.Type.AIR:
-			var material = StandardMaterial3D.new()
-			
-			# Get the appropriate texture for this block type
-			var texture = block_types.get_block_texture(block_type, "all")
-			if texture:
-				material.albedo_texture = texture
-			else:
-				# If no "all" texture, try side texture
-				material.albedo_texture = block_types.get_block_texture(block_type, "side")
-			
-			material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-			material.roughness = 0.8
-			materials[block_type] = material
+	# Create the base material
+	var material = StandardMaterial3D.new()
+	material.albedo_texture = load("res://images/grass_block_side.png")  # Default texture
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	material.roughness = 0.8
+	material.vertex_color_use_as_albedo = true
 	
-	# Set up the camera with controller
+	# Set up the camera
 	var camera = CameraController.new()
 	camera.position = Vector3(16, 32, 16)
 	camera.rotation_degrees = Vector3(-45, 45, 0)
 	camera.set_voxel_interaction(voxel_interaction)
 	add_child(camera)
 	
-	# Add a light
+	# Add lighting
 	var light = DirectionalLight3D.new()
 	light.position = Vector3(0, 10, 0)
 	light.rotation_degrees = Vector3(-45, 45, 0)
+	light.light_energy = 1.5
 	add_child(light)
 	
-	# Generate initial chunks with some terrain
+	# Generate initial chunks
 	chunk_manager.generate_chunks(Vector3i.ZERO)
 	
 	# Generate meshes for all chunks
 	for chunk in chunk_manager.chunks.values():
 		mesh_generator.generate_chunk_mesh(chunk)
-		
-		# Assign the appropriate material based on block type
-		for block_type in materials:
-			if chunk.has_block_type(block_type):
-				chunk.mesh_instance.material_override = materials[block_type]
-				break
+		chunk.mesh_instance.material_override = material
+
+func _process(_delta):
+	if Input.is_action_just_pressed("ui_cancel"):
+		get_tree().quit()
