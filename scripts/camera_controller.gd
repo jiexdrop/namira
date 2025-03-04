@@ -21,9 +21,11 @@ func _input(event):
 		var new_rotation = rotation.x - event.relative.y * mouse_sensitivity
 		rotation.x = clamp(new_rotation, -PI/2, PI/2)
 	
-	elif event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		if event.button_index == MOUSE_BUTTON_LEFT:
 			_handle_voxel_breaking()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			_handle_voxel_placing()
 	
 	elif event.is_action_pressed("ui_cancel"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -36,6 +38,19 @@ func _handle_voxel_breaking():
 		var target = voxel_interaction.get_target_voxel(self)
 		if target.hit:
 			voxel_interaction.break_voxel(target.chunk, target.voxel_pos)
+
+func _handle_voxel_placing():
+	if voxel_interaction:
+		var target = voxel_interaction.get_target_voxel(self)
+		if target.hit:
+			# Check if the place position would intersect with the player
+			var camera_pos = global_position
+			var place_world_pos = Vector3(target.place_pos) + Vector3(target.chunk.chunk_position * VoxelData.CHUNK_SIZE)
+			var distance = camera_pos.distance_to(place_world_pos)
+			
+			# Don't place if too close to the camera (prevents placing blocks inside player)
+			if distance > 1.5:
+				voxel_interaction.place_voxel(target.chunk, target.place_pos)
 
 func _physics_process(delta):
 	var input_dir = Vector3.ZERO
