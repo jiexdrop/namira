@@ -14,7 +14,7 @@ func _init():
 	# UV coordinates are normalized (0-1)
 	
 	# Example for a grass block (different texture for top, sides, and bottom)
-	block_uvs[VoxelData.VoxelType.SOLID] = {
+	block_uvs[BlockTypes.Type.GRASS] = {
 		"right":  _get_texture_uv(0, 0),   # Side texture (index 0,0 in atlas)
 		"left":   _get_texture_uv(0, 0),   # Side texture
 		"top":    _get_texture_uv(1, 0),   # Top texture (index 1,0 in atlas)

@@ -6,6 +6,7 @@ var movement_speed = 10.0
 var current_velocity = Vector3.ZERO
 var acceleration = 50.0
 var friction = 5.0
+var selected_block_type = BlockTypes.Type.STONE
 
 var voxel_interaction: VoxelInteraction
 
@@ -32,6 +33,18 @@ func _input(event):
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	
+	# Block selection hotkeys (1-6)
+	elif event.is_action_pressed("select_block_1"):
+		selected_block_type = BlockTypes.Type.STONE
+	elif event.is_action_pressed("select_block_2"):
+		selected_block_type = BlockTypes.Type.DIRT
+	elif event.is_action_pressed("select_block_3"):
+		selected_block_type = BlockTypes.Type.GRASS
+	elif event.is_action_pressed("select_block_4"):
+		selected_block_type = BlockTypes.Type.OAK_PLANKS
+	elif event.is_action_pressed("select_block_5"):
+		selected_block_type = BlockTypes.Type.COBBLESTONE
 
 func _handle_voxel_breaking():
 	if voxel_interaction:
@@ -45,12 +58,16 @@ func _handle_voxel_placing():
 		if target.hit:
 			# Check if the place position would intersect with the player
 			var camera_pos = global_position
-			var place_world_pos = Vector3(target.place_pos) + Vector3(target.chunk.chunk_position * VoxelData.CHUNK_SIZE)
+			
+			# Convert Vector3i to Vector3 before adding
+			var place_world_pos = Vector3(target.place_pos) + \
+				Vector3(target.chunk.chunk_position) * float(VoxelData.CHUNK_SIZE)
+			
 			var distance = camera_pos.distance_to(place_world_pos)
 			
 			# Don't place if too close to the camera (prevents placing blocks inside player)
-			if distance > 1.5:
-				voxel_interaction.place_voxel(target.chunk, target.place_pos)
+			if distance > 2.0:
+				voxel_interaction.place_voxel(target.chunk, target.place_pos, selected_block_type)
 
 func _physics_process(delta):
 	var input_dir = Vector3.ZERO
