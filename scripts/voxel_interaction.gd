@@ -43,7 +43,7 @@ func get_target_voxel(camera: Camera3D) -> Dictionary:
 			)
 			
 			var voxel = chunk.get_voxel(local_pos)
-			if voxel and voxel.type == VoxelData.VoxelType.SOLID:
+			if voxel and voxel.type == BlockTypes.Type.STONE:
 				result.chunk = chunk
 				result.voxel_pos = local_pos
 				result.hit = true
@@ -61,7 +61,7 @@ func get_target_voxel(camera: Camera3D) -> Dictionary:
 
 func break_voxel(chunk: Chunk, voxel_pos: Vector3i) -> void:
 	var voxel = VoxelData.Voxel.new()
-	voxel.type = VoxelData.VoxelType.AIR
+	voxel.type = BlockTypes.Type.AIR
 	chunk.set_voxel(voxel_pos, voxel)
 	mesh_generator.generate_chunk_mesh(chunk)
 
@@ -86,7 +86,7 @@ func place_voxel(chunk: Chunk, voxel_pos: Vector3i) -> void:
 	
 	if chunk:
 		var voxel = VoxelData.Voxel.new()
-		voxel.type = VoxelData.VoxelType.SOLID
+		voxel.type = BlockTypes.Type.OAK_PLANKS
 		# Set default colors for the new block
 		voxel.light_r = 10
 		voxel.light_g = 8

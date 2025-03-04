@@ -2,6 +2,9 @@ class_name MeshGenerator
 extends Node
 
 const VoxelData = preload("res://scripts/voxel_data.gd")
+const BlockTypes = preload("res://scripts/block_types.gd")
+
+var block_types = BlockTypes.new()
 
 # Vertices for each face defined in counter-clockwise order when viewed from outside
 var FACE_VERTICES = [
@@ -34,11 +37,14 @@ var FACE_UVS = [
 	[Vector2(0, 1), Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)]
 ]
 
+
+# Face mappings for texture orientation
+const FACE_NAMES = ["right", "left", "top", "bottom", "front", "back"]
+
 func generate_chunk_mesh(chunk: Chunk) -> void:
 	var vertices = PackedVector3Array()
 	var uvs = PackedVector2Array()
 	var normals = PackedVector3Array()
-	var colors = PackedColorArray()
 	var indices = PackedInt32Array()
 	
 	var vertex_index = 0
@@ -48,15 +54,14 @@ func generate_chunk_mesh(chunk: Chunk) -> void:
 			for z in range(VoxelData.CHUNK_SIZE):
 				var pos = Vector3i(x, y, z)
 				var voxel = chunk.get_voxel(pos)
-				if voxel.type == VoxelData.VoxelType.SOLID:
-					vertex_index = _add_voxel_faces(vertices, uvs, normals, colors, indices, pos, voxel, chunk, vertex_index)
+				if voxel.type != BlockTypes.Type.AIR:
+					vertex_index = _add_voxel_faces(vertices, uvs, normals, indices, pos, voxel, chunk, vertex_index)
 	
 	var arrays = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_TEX_UV] = uvs
 	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_COLOR] = colors
 	arrays[Mesh.ARRAY_INDEX] = indices
 	
 	var mesh = ArrayMesh.new()
@@ -64,9 +69,9 @@ func generate_chunk_mesh(chunk: Chunk) -> void:
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		chunk.mesh_instance.mesh = mesh
 
-func _add_voxel_faces(vertices: PackedVector3Array, uvs: PackedVector2Array, normals: PackedVector3Array, 
-					 colors: PackedColorArray, indices: PackedInt32Array, pos: Vector3i, 
-					 voxel: VoxelData.Voxel, chunk: Chunk, vertex_index: int) -> int:
+func _add_voxel_faces(vertices: PackedVector3Array, uvs: PackedVector2Array, normals: PackedVector3Array,
+					 indices: PackedInt32Array, pos: Vector3i, voxel: VoxelData.Voxel, chunk: Chunk,
+					 vertex_index: int) -> int:
 	var neighbors = [
 		Vector3i(1, 0, 0), Vector3i(-1, 0, 0),  # Right, Left
 		Vector3i(0, 1, 0), Vector3i(0, -1, 0),  # Top, Bottom
@@ -74,33 +79,25 @@ func _add_voxel_faces(vertices: PackedVector3Array, uvs: PackedVector2Array, nor
 	]
 	
 	var face_normals = [
-		Vector3(1, 0, 0), Vector3(-1, 0, 0),    # Right, Left
-		Vector3(0, 1, 0), Vector3(0, -1, 0),    # Top, Bottom
-		Vector3(0, 0, 1), Vector3(0, 0, -1)     # Front, Back
+		Vector3(1, 0, 0), Vector3(-1, 0, 0),
+		Vector3(0, 1, 0), Vector3(0, -1, 0),
+		Vector3(0, 0, 1), Vector3(0, 0, -1)
 	]
 	
 	for i in range(6):
 		var neighbor_pos = pos + neighbors[i]
 		var neighbor = chunk.get_voxel(neighbor_pos)
 		
-		if neighbor == null or neighbor.type == VoxelData.VoxelType.AIR:
-			var base_color = Color(1.0, 1.0, 1.0)
-			var ao_color = Color(1.0 - voxel.ao * 0.3, 1.0 - voxel.ao * 0.3, 1.0 - voxel.ao * 0.3)
-			var light_color = Color(
-				float(voxel.light_r) / VoxelData.MAX_LIGHT_LEVEL,
-				float(voxel.light_g) / VoxelData.MAX_LIGHT_LEVEL,
-				float(voxel.light_b) / VoxelData.MAX_LIGHT_LEVEL
-			)
-			var final_color = base_color * ao_color * light_color
+		if neighbor == null or neighbor.type == BlockTypes.Type.AIR:
+			var face_name = FACE_NAMES[i]
 			
 			# Add vertices
 			for v in range(4):
 				vertices.append(FACE_VERTICES[i][v] + Vector3(pos))
-				uvs.append(FACE_UVS[i][v])
+				uvs.append(Vector2(float(v == 1 or v == 2), float(v >= 2)))
 				normals.append(face_normals[i])
-				colors.append(final_color)
 			
-			# Add indices for triangles in counter-clockwise order
+			# Add indices for triangles
 			indices.append(vertex_index)
 			indices.append(vertex_index + 1)
 			indices.append(vertex_index + 2)

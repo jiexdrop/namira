@@ -26,13 +26,13 @@ func _initialize_voxels():
 				var voxel = VoxelData.Voxel.new()
 				
 				if world_y < height:
-					voxel.type = VoxelData.VoxelType.SOLID
+					voxel.type = BlockTypes.Type.STONE
 					# Add some color variation based on height
 					voxel.light_r = 10 + (world_y / height) * 5
 					voxel.light_g = 8 + (world_y / height) * 7
 					voxel.light_b = 5 + (world_y / height) * 10
 				else:
-					voxel.type = VoxelData.VoxelType.AIR
+					voxel.type = BlockTypes.Type.AIR
 				
 				set_voxel(Vector3i(x, y, z), voxel)
 
@@ -56,3 +56,10 @@ func _is_position_valid(position: Vector3i) -> bool:
 	return position.x >= 0 and position.x < VoxelData.CHUNK_SIZE \
 		and position.y >= 0 and position.y < VoxelData.CHUNK_SIZE \
 		and position.z >= 0 and position.z < VoxelData.CHUNK_SIZE
+
+
+func has_block_type(block_type: int) -> bool:
+	for voxel in voxels:
+		if voxel is VoxelData.Voxel and voxel.type == block_type:
+			return true
+	return false
