@@ -32,6 +32,11 @@ func create_chunk(position: Vector3i) -> void:
 		position.y * VoxelData.CHUNK_SIZE,
 		position.z * VoxelData.CHUNK_SIZE
 	)
+	
+func add_chunk(chunk: Chunk) -> void:
+	chunks[chunk.chunk_position] = chunk
 
 func get_chunk(position: Vector3i) -> Chunk:
-	return chunks.get(position)
+	if chunks.has(position):
+		return chunks[position]
+	return null

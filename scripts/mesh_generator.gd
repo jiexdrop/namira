@@ -42,7 +42,7 @@ const FACE_NORMALS = [
 ]
 
 # Standard UV coordinates for a face
-const FACE_UVS = PackedVector2Array([
+var FACE_UVS = PackedVector2Array([
 	Vector2(0, 1), # Bottom-left
 	Vector2(0, 0), # Top-left
 	Vector2(1, 0), # Top-right

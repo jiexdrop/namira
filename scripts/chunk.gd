@@ -1,20 +1,31 @@
 class_name Chunk
 extends Node3D
 
+var mesh_instance: MeshInstance3D
 const VoxelData = preload("res://scripts/voxel_data.gd")
 
 var chunk_position: Vector3i
 var voxels: Array = []
-var mesh_instance: MeshInstance3D
 
-func _init(position: Vector3i):
-	chunk_position = position
-	_initialize_voxels()
+func _init(position):
 	mesh_instance = MeshInstance3D.new()
 	add_child(mesh_instance)
 	
-	# Enable transparency for the mesh instance
+	# Make sure mesh_instance is visible
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	mesh_instance.gi_mode = GeometryInstance3D.GI_MODE_STATIC
+
+func get_voxel(pos: Vector3i) -> VoxelData.Voxel:
+	# Implement your voxel getter logic here
+	if pos.x < 0 or pos.y < 0 or pos.z < 0 or \
+	   pos.x >= VoxelData.CHUNK_SIZE or \
+	   pos.y >= VoxelData.CHUNK_SIZE or \
+	   pos.z >= VoxelData.CHUNK_SIZE:
+		return null
+	
+	# Return your voxel data here
+	# For testing, you can return a simple block:
+	return VoxelData.Voxel.new(BlockTypes.Type.DIRT)
 
 func _initialize_voxels():
 	voxels.resize(VoxelData.CHUNK_SIZE * VoxelData.CHUNK_SIZE * VoxelData.CHUNK_SIZE)
@@ -42,12 +53,6 @@ func _initialize_voxels():
 					voxel.type = BlockTypes.Type.AIR
 				
 				set_voxel(Vector3i(x, y, z), voxel)
-
-func get_voxel(position: Vector3i) -> VoxelData.Voxel:
-	var index = _get_voxel_index(position)
-	if index == -1:
-		return null
-	return voxels[index]
 
 func set_voxel(position: Vector3i, voxel: VoxelData.Voxel) -> void:
 	var index = _get_voxel_index(position)
