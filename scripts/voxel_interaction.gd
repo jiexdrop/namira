@@ -20,47 +20,105 @@ func get_target_voxel(camera: Camera3D) -> Dictionary:
 		"place_pos": Vector3i.ZERO
 	}
 	
-	var from = camera.global_position
-	var direction = -camera.global_transform.basis.z
-	var step_size = MAX_RAYCAST_DISTANCE / RAYCAST_STEPS
-	var last_pos = Vector3i.ZERO
-	var last_chunk = null
+	var ray_start = camera.global_position
+	var ray_dir = -camera.global_transform.basis.z.normalized()
 	
-	for i in range(RAYCAST_STEPS):
-		var check_pos = from + direction * (step_size * i)
-		var chunk_pos = Vector3i(
-			floor(check_pos.x / VoxelData.CHUNK_SIZE),
-			floor(check_pos.y / VoxelData.CHUNK_SIZE),
-			floor(check_pos.z / VoxelData.CHUNK_SIZE)
+	# Initialize the voxel and chunk positions at ray start
+	var voxel_pos = Vector3i(floor(ray_start.x), floor(ray_start.y), floor(ray_start.z))
+	var chunk_pos = Vector3i(
+		floor(ray_start.x / VoxelData.CHUNK_SIZE),
+		floor(ray_start.y / VoxelData.CHUNK_SIZE),
+		floor(ray_start.z / VoxelData.CHUNK_SIZE)
+	)
+	
+	# Calculate step direction
+	var step = Vector3i(
+		1 if ray_dir.x >= 0 else -1,
+		1 if ray_dir.y >= 0 else -1,
+		1 if ray_dir.z >= 0 else -1
+	)
+	
+	# Calculate distance to next voxel boundary
+	var delta_dist = Vector3(
+		INF if ray_dir.x == 0 else abs(1.0 / ray_dir.x),
+		INF if ray_dir.y == 0 else abs(1.0 / ray_dir.y),
+		INF if ray_dir.z == 0 else abs(1.0 / ray_dir.z)
+	)
+	
+	# Calculate initial side_dist values
+	var side_dist = Vector3(
+		((floor(ray_start.x) + 1.0 - ray_start.x) if step.x > 0 else (ray_start.x - floor(ray_start.x))) * delta_dist.x,
+		((floor(ray_start.y) + 1.0 - ray_start.y) if step.y > 0 else (ray_start.y - floor(ray_start.y))) * delta_dist.y,
+		((floor(ray_start.z) + 1.0 - ray_start.z) if step.z > 0 else (ray_start.z - floor(ray_start.z))) * delta_dist.z
+	)
+	
+	var last_voxel_pos = voxel_pos
+	var last_chunk = null
+	var normal = Vector3i.ZERO
+	
+	# Ray march through the voxel grid
+	for i in range(int(MAX_RAYCAST_DISTANCE * 2)):
+		# Get local voxel position within the chunk
+		var local_pos = Vector3i(
+			posmod(voxel_pos.x, VoxelData.CHUNK_SIZE),
+			posmod(voxel_pos.y, VoxelData.CHUNK_SIZE),
+			posmod(voxel_pos.z, VoxelData.CHUNK_SIZE)
 		)
 		
-		var chunk = chunk_manager.get_chunk(chunk_pos)
-		if chunk:
-			var local_pos = Vector3i(
-				posmod(int(check_pos.x), VoxelData.CHUNK_SIZE),
-				posmod(int(check_pos.y), VoxelData.CHUNK_SIZE),
-				posmod(int(check_pos.z), VoxelData.CHUNK_SIZE)
-			)
-			
-			var voxel = chunk.get_voxel(local_pos)
+		var current_chunk = chunk_manager.get_chunk(chunk_pos)
+		
+		if current_chunk:
+			var voxel = current_chunk.get_voxel(local_pos)
 			if voxel and voxel.type != BlockTypes.Type.AIR:
-				result.chunk = chunk
+				result.chunk = current_chunk
 				result.voxel_pos = local_pos
 				result.hit = true
+				result.normal = normal
 				
-				# Calculate the normal and placement position
-				if i > 0:
-					result.normal = (last_pos - local_pos).sign()
-					if last_chunk:
-						result.chunk = last_chunk
-						result.place_pos = last_pos
-					else:
-						result.place_pos = local_pos + result.normal
+				# Calculate the placement position
+				if last_chunk:
+					result.chunk = last_chunk
+					result.place_pos = last_voxel_pos
+				else:
+					result.place_pos = local_pos + normal
 				
-				break
+				return result
 			
-			last_pos = local_pos
-			last_chunk = chunk
+			last_voxel_pos = local_pos
+			last_chunk = current_chunk
+		
+		# Determine which direction to step
+		var mask = Vector3i.ZERO
+		if side_dist.x < side_dist.y:
+			if side_dist.x < side_dist.z:
+				side_dist.x += delta_dist.x
+				voxel_pos.x += step.x
+				mask.x = -step.x
+			else:
+				side_dist.z += delta_dist.z
+				voxel_pos.z += step.z
+				mask.z = -step.z
+		else:
+			if side_dist.y < side_dist.z:
+				side_dist.y += delta_dist.y
+				voxel_pos.y += step.y
+				mask.y = -step.y
+			else:
+				side_dist.z += delta_dist.z
+				voxel_pos.z += step.z
+				mask.z = -step.z
+		
+		normal = mask
+		
+		# Update chunk position if we've crossed a chunk boundary
+		var new_chunk_pos = Vector3i(
+			floor(voxel_pos.x / float(VoxelData.CHUNK_SIZE)),
+			floor(voxel_pos.y / float(VoxelData.CHUNK_SIZE)),
+			floor(voxel_pos.z / float(VoxelData.CHUNK_SIZE))
+		)
+		
+		if new_chunk_pos != chunk_pos:
+			chunk_pos = new_chunk_pos
 	
 	return result
 
