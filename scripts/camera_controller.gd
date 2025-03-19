@@ -50,8 +50,10 @@ func _handle_voxel_breaking():
 	if voxel_interaction:
 		var target = voxel_interaction.get_target_voxel(self)
 		if target.hit:
+			# Add print statement for debugging
+			print("Breaking voxel at: ", target.voxel_pos, " in chunk: ", target.chunk.chunk_position)
 			voxel_interaction.break_voxel(target.chunk, target.voxel_pos)
-
+			
 func _handle_voxel_placing():
 	if voxel_interaction:
 		var target = voxel_interaction.get_target_voxel(self)

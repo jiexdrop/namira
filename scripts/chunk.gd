@@ -8,24 +8,22 @@ var chunk_position: Vector3i
 var voxels: Array = []
 
 func _init(position):
+	chunk_position = position
 	mesh_instance = MeshInstance3D.new()
 	add_child(mesh_instance)
+	
+	# Initialize voxels
+	_initialize_voxels()
 	
 	# Make sure mesh_instance is visible
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	mesh_instance.gi_mode = GeometryInstance3D.GI_MODE_STATIC
 
 func get_voxel(pos: Vector3i) -> VoxelData.Voxel:
-	# Implement your voxel getter logic here
-	if pos.x < 0 or pos.y < 0 or pos.z < 0 or \
-	   pos.x >= VoxelData.CHUNK_SIZE or \
-	   pos.y >= VoxelData.CHUNK_SIZE or \
-	   pos.z >= VoxelData.CHUNK_SIZE:
+	var index = _get_voxel_index(pos)
+	if index == -1:
 		return null
-	
-	# Return your voxel data here
-	# For testing, you can return a simple block:
-	return VoxelData.Voxel.new(BlockTypes.Type.DIRT)
+	return voxels[index]
 
 func _initialize_voxels():
 	voxels.resize(VoxelData.CHUNK_SIZE * VoxelData.CHUNK_SIZE * VoxelData.CHUNK_SIZE)

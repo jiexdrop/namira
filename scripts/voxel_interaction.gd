@@ -67,11 +67,15 @@ func get_target_voxel(camera: Camera3D) -> Dictionary:
 func break_voxel(chunk: Chunk, voxel_pos: Vector3i) -> void:
 	# Check if the position is valid
 	if not chunk._is_position_valid(voxel_pos):
+		print("Invalid voxel position: ", voxel_pos)
 		return
 		
 	var voxel = VoxelData.Voxel.new()
 	voxel.type = BlockTypes.Type.AIR
 	chunk.set_voxel(voxel_pos, voxel)
+	
+	# Debug print to confirm the voxel was set to AIR
+	print("Set voxel to AIR at position: ", voxel_pos)
 	
 	# Update the chunk mesh
 	mesh_generator.generate_chunk_mesh(chunk)

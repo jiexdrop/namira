@@ -85,6 +85,12 @@ func generate_chunk_mesh(chunk: Chunk) -> void:
 			material.albedo_texture = block_types.get_texture_for_face(face_data.block_type, face_data.face_type)
 			material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 			material.roughness = 0.8
+			
+			if face_data.block_type == BlockTypes.Type.GRASS and face_data.face_type == "top":
+				material.albedo_color = Color(0.4, 1.0, 0.3, 1.0)  # Green tint
+			else:
+				material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)  # White (no tint)
+				
 			material.vertex_color_use_as_albedo = true
 			materials.append(material)
 	

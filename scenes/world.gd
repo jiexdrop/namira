@@ -18,7 +18,7 @@ func _ready():
 	generate_initial_chunks()
 	
 	# Set up camera controller if it exists
-	var camera = get_node_or_null("Camera3D")
+	var camera = get_parent().get_node_or_null("Camera3D")
 	if camera and camera is CameraController:
 		var voxel_interaction = VoxelInteraction.new(chunk_manager, mesh_generator)
 		add_child(voxel_interaction)
