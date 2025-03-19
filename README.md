@@ -3,11 +3,11 @@ A simple voxel-based game created using Godot Engine.
 
 # Features
 
-First-person camera controls
-Terrain generation with different block types
-Block placing and breaking
-Multiple block types (Stone, Dirt, Grass, Oak Planks, Cobblestone)
-Block selection via number keys (1-5) or mouse scroll wheel
+- First-person camera controls
+- Terrain generation with different block types
+- Block placing and breaking
+- Multiple block types (Stone, Dirt, Grass, Oak Planks, Cobblestone)
+- Block selection via number keys (1-5) or mouse scroll wheel
 
 # Controls
 
