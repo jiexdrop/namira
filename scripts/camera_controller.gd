@@ -12,6 +12,9 @@ var voxel_interaction: VoxelInteraction
 
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	
+	# Initialize the UI
+	_update_block_selection_ui()
 
 func set_voxel_interaction(interaction: VoxelInteraction):
 	voxel_interaction = interaction
@@ -27,6 +30,11 @@ func _input(event):
 			_handle_voxel_breaking()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			_handle_voxel_placing()
+		# Add scroll wheel handling
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_cycle_block_selection(-1)  # Scroll up to go to previous block
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_cycle_block_selection(1)   # Scroll down to go to next block
 	
 	elif event.is_action_pressed("ui_cancel"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -45,6 +53,47 @@ func _input(event):
 		selected_block_type = BlockTypes.Type.OAK_PLANKS
 	elif event.is_action_pressed("select_block_5"):
 		selected_block_type = BlockTypes.Type.COBBLESTONE
+
+# Add this function to handle cycling through block types
+func _cycle_block_selection(direction: int) -> void:
+	# Get all block types (excluding AIR which is at index 0)
+	var block_types = [
+		BlockTypes.Type.STONE,
+		BlockTypes.Type.DIRT,
+		BlockTypes.Type.GRASS,
+		BlockTypes.Type.OAK_PLANKS,
+		BlockTypes.Type.COBBLESTONE
+	]
+	
+	# Find current index
+	var current_index = block_types.find(selected_block_type)
+	if current_index == -1:
+		current_index = 0  # Default to first block if not found
+	
+	# Calculate new index with wrap-around
+	var new_index = (current_index + direction) % block_types.size()
+	if new_index < 0:
+		new_index = block_types.size() + new_index
+	
+	# Set new block type
+	selected_block_type = block_types[new_index]
+	
+	# Update UI to show selected block
+	_update_block_selection_ui()
+
+# Add this function to update the UI
+func _update_block_selection_ui() -> void:
+	# Get reference to UI element
+	var ui = get_node_or_null("/root/Main/CanvasLayer/HBoxContainer")
+	if ui:
+		# Clear existing children
+		for child in ui.get_children():
+			child.queue_free()
+		
+		# Display the name of the selected block
+		var label = Label.new()
+		label.text = "Selected: " + BlockTypes.Type.keys()[selected_block_type]
+		ui.add_child(label)
 
 func _handle_voxel_breaking():
 	if voxel_interaction:
