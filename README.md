@@ -1,5 +1,5 @@
 # Namira Voxel Game 
-A simple voxel-based game created using Godot Engine.
+A simple voxel-based game created using Godot Engine version 4.4.
 
 # Features
 
